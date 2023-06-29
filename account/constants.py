@@ -38,7 +38,7 @@ USER_NAME_REGEX = "^[a-zA-Z ]+$"  # Used for both first_name and last_name field
 PHONE_NUMBER_REGEX = "^\\+?[1-9][0-9]{7,14}$"
 
 # Message
-REGISTER_SUCCESS = "Registered successfully, now you can verify from link sent"
+REGISTER_SUCCESS = "Account verification link sent to registered email"
 LOGIN_SUCCESS = "Successfully logged in"
 LOGOUT_SUCCESS = "Successfully logged out"
 REFRESH_TOKEN_SUCCESS = "Access token refreshed successfully"
