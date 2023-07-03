@@ -14,7 +14,6 @@ from pathlib import Path
 
 import os
 from dotenv import load_dotenv
-
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,10 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-z61lza=tib&3+@s%dt=b+!&8$t4_!wej$vw+23vc-bjlxn^zk='
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(',')
 
@@ -46,6 +45,7 @@ INSTALLED_APPS = [
 
     # other libraries
     'corsheaders',
+    'rest_framework_simplejwt'
 ]
 
 MIDDLEWARE = [
@@ -134,17 +134,19 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom settings
-
 AUTH_USER_MODEL = 'account.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
     'EXCEPTION_HANDLER': 'core.utils.custom_exception_handler',
 }
 
-FRONT_END_DOMAIN = os.getenv('FRONT_END_DOMAIN')
+FRONT_END_DOMAIN = os.getenv('FRONT_END_DOMAIN', 'http://localhost:3000')
 
 # EMAIL SETTINGS
 EMAIL_USE_TLS = True
