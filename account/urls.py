@@ -1,6 +1,14 @@
-from django.urls import path
+from django.urls import path, include
 
-from account.views import LoginView, RegisterView, RefreshTokenView, LogoutView, VerifyEmailView
+from rest_framework.routers import DefaultRouter
+
+from account.views import (
+    LoginView, RegisterView, RefreshTokenView,
+    LogoutView, VerifyEmailView, UserViewSet
+)
+
+router = DefaultRouter()
+router.register('users', UserViewSet)
 
 urlpatterns = [
     # No AuthRequired
@@ -13,4 +21,5 @@ urlpatterns = [
     # AuthRequired
     path('token/', RefreshTokenView.as_view(), name='refresh_token'),
     path('logout/', LogoutView.as_view(), name='logout_user'),
+    path('', include(router.urls)),
 ]

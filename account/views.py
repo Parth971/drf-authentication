@@ -1,12 +1,13 @@
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenBlacklistView, TokenRefreshView
 
 from account.constants import REGISTER_SUCCESS, LOGIN_SUCCESS, LOGOUT_SUCCESS, REFRESH_TOKEN_SUCCESS
 from account.mixins import ExceptionHandlerMixin, VerifyEmailMixin, ModifyResponseMixin, EmailVerificationMixin
 from account.models import User
-from account.serializers import RegisterSerializer, LoginSerializer
+from account.serializers import RegisterSerializer, LoginSerializer, UserSerializer
 from account.utils import send_email_verification_email
 
 
@@ -61,3 +62,8 @@ class VerifyEmailView(ExceptionHandlerMixin, VerifyEmailMixin, APIView):
 
     def get(self, request, token, *args, **kwargs):
         return self.verify(token)
+
+
+class UserViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
