@@ -4,6 +4,9 @@ DB_PASS=postgres
 DB_PORT=5432
 DB_HOST=localhost
 
+SECRET_KEY=django-insecure-z61lza=tib&3+@s%dt=b+!&8$t4_!wej$vw+23vc-bjlxn^zk=
+DEBUG=True
+
 EMAIL_HOST_USER=email
 EMAIL_HOST_PASSWORD=password
 FRONT_END_DOMAIN=http://localhost:3000
