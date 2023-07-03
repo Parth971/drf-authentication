@@ -1,33 +1,23 @@
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.urls import reverse
 
 
-def send_mail(to, template, context):
-    html_content = render_to_string(f'account/emails/{template}.html', context)
-    msg = EmailMessage(context['subject'], html_content, to=[to])
+def send_mail(to, txt_template, html_template, context):
+    txt_body = render_to_string(txt_template, context)
+    html_body = render_to_string(html_template, context)
+
+    msg = EmailMultiAlternatives(context['subject'], txt_body, to=[to])
+    msg.attach_alternative(html_body, "text/html")
     msg.send()
 
 
-def send_email_verification_email(user):
+def send_email_verification_email(user, txt_template, html_template, subject):
     token = user.generate_activation_token()
-    link = F"{settings.FRONT_END_DOMAIN}/auth/verify-email/{token}"
+    url = reverse('verify_user_email', args=[token])
     context = {
-        'subject': 'Email Verification',
-        'uri': link,
+        'subject': subject,
+        'uri': f"{settings.FRONT_END_DOMAIN}{url}",
     }
-    send_mail(user.email, 'email_verification', context)
-
-
-def get_model_object(model_class, query):
-    """
-    Retrieve a single object from the specified model class based on the provided query.
-
-    Args:
-        model_class (Model): The model class to retrieve the object from.
-        query (dict): The query parameters used to filter the objects.
-
-    Returns:
-        Model: The retrieved object or None if not found.
-    """
-    return model_class.objects.filter(**query).first()
+    send_mail(user.email, txt_template, html_template, context)

@@ -14,6 +14,7 @@ from pathlib import Path
 
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -142,8 +143,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    ),
-    'EXCEPTION_HANDLER': 'core.utils.custom_exception_handler',
+    )
 }
 
 FRONT_END_DOMAIN = os.getenv('FRONT_END_DOMAIN', 'http://localhost:3000')
@@ -162,3 +162,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(seconds=int(os.environ.get('ACCESS_TOKEN_LIFETIME'))),
     'REFRESH_TOKEN_LIFETIME': timedelta(seconds=int(os.environ.get('REFRESH_TOKEN_LIFETIME'))),
 }
+
+VERIFICATION_EMAIL_HTML_TEMPLATE = 'account/emails/email_verification.html'
+VERIFICATION_EMAIL_TXT_TEMPLATE = 'account/emails/email_verification.txt'
+VERIFICATION_EMAIL_SUBJECT = 'Account Verification'

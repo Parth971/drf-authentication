@@ -2,21 +2,19 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenObtainSerializer
 
-from account.models import User
-
 from account.constants import (
-    PASSWORD_HELP_TEXT, EMAIL_NOT_UNIQUE, EMAIL_REQUIRED_ERROR,
-    PASSWORD_REQUIRED_ERROR, FIRST_NAME_REQUIRED_ERROR, LAST_NAME_REQUIRED_ERROR,
-    MOBILE_NUMBER_REQUIRED_ERROR, COMPANY_NAME_REQUIRED_ERROR, JOB_TITLE_REQUIRED_ERROR,
-    LOGIN_FAILED
+    EMAIL_NOT_UNIQUE, EMAIL_REQUIRED_ERROR, LOGIN_FAILED, EMAIL_UNVERIFIED,
+    PASSWORD_REQUIRED_ERROR, FIRST_NAME_REQUIRED_ERROR, LAST_NAME_REQUIRED_ERROR
 )
-
-from account.utils import send_email_verification_email, get_model_object
-from account.validators import validate_password, validate_first_name, validate_last_name, validate_mobile_number
+from account.models import User
+from account.validators import validate_password, validate_first_name, validate_last_name
 
 
 class LoginSerializer(TokenObtainPairSerializer, TokenObtainSerializer):
-    default_error_messages = {"no_active_account": LOGIN_FAILED}
+    default_error_messages = {
+        "no_active_account": LOGIN_FAILED,
+        "not_verified": EMAIL_UNVERIFIED,
+    }
 
     @classmethod
     def get_token(cls, user):
@@ -27,12 +25,18 @@ class LoginSerializer(TokenObtainPairSerializer, TokenObtainSerializer):
         return token
 
     def validate(self, attrs):
-        user = get_model_object(User, query={'email': attrs[self.username_field]})
+        user = User.objects.filter(email=attrs[self.username_field]).first()
 
         if user and not user.is_active:
-            raise serializers.ValidationError({'email': 'Email is not verified'})
+            raise serializers.ValidationError({'email': self.default_error_messages.get('not_verified')})
 
         return super().validate(attrs)
+
+    @property
+    def validated_data(self):
+        validated_data = super().validated_data
+        validated_data['admin'] = self.user.is_staff
+        return validated_data
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -45,7 +49,6 @@ class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,
         required=True,
-        help_text=PASSWORD_HELP_TEXT,
         validators=[validate_password],
         error_messages={'required': PASSWORD_REQUIRED_ERROR, 'blank': PASSWORD_REQUIRED_ERROR}
     )
@@ -75,10 +78,4 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        """
-        This function will create user instance and send email regarding email verification.
-        :rtype: User object
-        """
-        user = User.objects.create_user(**validated_data, is_active=False)
-        send_email_verification_email(user)
-        return user
+        return User.objects.create_user(**validated_data, is_active=False)
